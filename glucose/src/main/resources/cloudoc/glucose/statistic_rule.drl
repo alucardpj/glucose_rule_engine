@@ -3,51 +3,63 @@ package cloudoc.glucose;
 //fbg count
 rule "fbg count"
     ruleflow-group "statistic"
-    dialect "mvel"
-    // lock-on-active true
+    // no-loop
 
 	when
-	    $s : Statistic()
-		$r : Record( acktype in (0, 2, 4) )
+	    $s : Statistic( fbgCountUpdated == false )
+		Number( $count : intValue )
+		    from accumulate( Record( acktype in (0, 2, 4) ), count() )
 	then
-		$s.fbgCount = $s.fbgCount + 1
+	    modify($s) {
+	        setFbgCount( $s.getFbgCount() + $count ),
+	        setFbgCountUpdated(true);
+	    }
 end
 
 //fbg normal count
 rule "fbg normal count"
-    extends "fbg count"
     ruleflow-group "statistic"
-    dialect "mvel"
-    // lock-on-active true
-    
+    // no-loop
+
     when
-        Record( level == 2 )
+        $s : Statistic( fbgNormalCountUpdated == false )
+		Number( $count : intValue )
+		    from accumulate( Record( acktype in (0, 2, 4), level == 2 ), count() )
     then
-		$s.fbgNormalCount = $s.fbgNormalCount + 1
+	    modify($s) {
+	        setFbgNormalCount( $s.getFbgNormalCount() + $count ),
+	        setFbgNormalCountUpdated(true);
+	    }
 end
 
 //2 hpg count
 rule "2 hpg count"
     ruleflow-group "statistic"
-    dialect "mvel"
-    // lock-on-active true
-    
+    // no-loop
+
 	when
-	    $s : Statistic()
-		$r : Record( acktype in (1, 3, 5) )
+	    $s : Statistic( twoHpgCountUpdated == false )
+		Number( $count : intValue )
+		    from accumulate( Record( acktype in (1, 3, 5) ), count() )
 	then
-		$s.twoHpgCount = $s.twoHpgCount + 1
+	    modify($s) {
+	        setTwoHpgCount( $s.getTwoHpgCount() + $count ),
+	        setTwoHpgCountUpdated(true);
+	    }
 end
 
 //2 hpg normal count
 rule "2 hpg normal count"
-    extends "2 hpg count"
     ruleflow-group "statistic"
-    dialect "mvel"
-    // lock-on-active true
-    
+    // no-loop
+
     when
-        Record( level == 2 )
+        $s : Statistic( twoHpgNormalCountUpdated == false )
+		Number( $count : intValue )
+		    from accumulate( Record( acktype in (1, 3, 5), level == 2 ), count() )
     then
-		$s.twoHpgNormalCount = $s.twoHpgNormalCount + 1
+	    modify($s) {
+	        setTwoHpgNormalCount( $s.getTwoHpgNormalCount() + $count ),
+	        setTwoHpgNormalCountUpdated(true);
+	    }
 end
